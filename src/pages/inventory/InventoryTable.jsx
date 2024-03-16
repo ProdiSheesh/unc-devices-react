@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import {
   Card,
   CardHeader,
@@ -10,49 +11,20 @@ import {
   IconButton,
   Tooltip,
 } from "@material-tailwind/react";
-import { MdAdd, MdOutlineEdit, MdOutlineSearch } from "react-icons/md";
+import { useForm } from "react-hook-form";
+import {
+  MdAdd,
+  MdDeleteOutline,
+  MdOutlineEdit,
+  MdOutlineRemoveRedEye,
+  MdOutlineSearch,
+} from "react-icons/md";
 
-const TABLE_HEAD = ["Name", "Tag Number", "Type", "Status", "Remarks", ""];
+const TABLE_HEAD = ["Name", "Tag Number", "Category", "Status", ""];
 
-const TABLE_ROWS = [
-  {
-    name: "Chromebook 2013",
-    tagNumber: "123456789",
-    type: "ChromeBook",
-    status: "Available",
-    remarks: "New arrival",
-  },
-  {
-    name: "Chromebook 2013",
-    tagNumber: "123456789",
-    type: "ChromeBook",
-    status: "Available",
-    remarks: "New arrival",
-  },
-  {
-    name: "Chromebook 2013",
-    tagNumber: "123456789",
-    type: "ChromeBook",
-    status: "Available",
-    remarks: "New arrival",
-  },
-  {
-    name: "Chromebook 2013",
-    tagNumber: "123456789",
-    type: "ChromeBook",
-    status: "Available",
-    remarks: "New arrival",
-  },
-  {
-    name: "Chromebook 2013",
-    tagNumber: "123456789",
-    type: "ChromeBook",
-    status: "Available",
-    remarks: "New arrival",
-  },
-];
+export function InventoryTable({ data, onDelete, onNavigate, onSearch }) {
+  const { register, handleSubmit } = useForm();
 
-export function InventoryTable() {
   return (
     <Card className="h-full w-full shadow-none bg-[#fdfdfd]">
       <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -62,17 +34,23 @@ export function InventoryTable() {
               Device Inventory
             </Typography>
             <Typography color="gray" className="mt-1 font-normal">
-              You have a total of 1,000 Devices
+              You have a total of {data.length} Devices
             </Typography>
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-            <div className="w-full md:w-72">
+            <form onSubmit={handleSubmit(onSearch)} className="w-full md:w-72">
               <Input
                 label="Search"
                 icon={<MdOutlineSearch className="h-5 w-5" />}
+                {...register("query")}
               />
-            </div>
-            <Button className="flex items-center gap-3" size="sm">
+              <button type="submit" hidden></button>
+            </form>
+            <Button
+              onClick={() => onNavigate("/inventory/devices/add")}
+              className="flex items-center gap-3"
+              size="sm"
+            >
               <MdAdd className="h-4 w-4" /> Add Device
             </Button>
           </div>
@@ -99,72 +77,103 @@ export function InventoryTable() {
             </tr>
           </thead>
           <tbody>
-            {TABLE_ROWS.map(
-              ({ name, tagNumber, type, status, remarks }, index) => {
-                const isLast = index === TABLE_ROWS.length - 1;
-                const classes = isLast
-                  ? "p-4"
-                  : "p-4 border-b border-blue-gray-50";
+            {data.map(({ id, name, tagNumber, category, status }, index) => {
+              const isLast = index === data.length - 1;
+              const classes = isLast
+                ? "p-4"
+                : "p-4 border-b border-blue-gray-50";
 
-                return (
-                  <tr key={name}>
-                    <td className={classes}>
-                      <div className="flex items-center gap-3">
-                        <div className="flex flex-col">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {name}
-                          </Typography>
-                        </div>
-                      </div>
-                    </td>
-                    <td className={classes}>
+              return (
+                <tr key={id}>
+                  <td className={classes}>
+                    <div className="flex items-center gap-3">
                       <div className="flex flex-col">
                         <Typography
                           variant="small"
                           color="blue-gray"
                           className="font-normal"
                         >
-                          {tagNumber}
+                          {name}
                         </Typography>
                       </div>
-                    </td>
-                    <td className={classes}>
-                      <div className="w-max">{type}</div>
-                    </td>
-                    <td className={classes}>
-                      <div className="w-max">
-                        <Chip
-                          variant="ghost"
-                          size="sm"
-                          value={status ? "Available" : "Not Available"}
-                          color={status ? "green" : "blue-gray"}
-                        />
-                      </div>
-                    </td>
-                    <td className={classes}>
+                    </div>
+                  </td>
+                  <td className={classes}>
+                    <div className="flex flex-col">
                       <Typography
                         variant="small"
                         color="blue-gray"
                         className="font-normal"
                       >
-                        {remarks}
+                        {tagNumber}
                       </Typography>
-                    </td>
-                    <td className={classes}>
-                      <Tooltip content="Edit Device">
-                        <IconButton variant="text">
-                          <MdOutlineEdit className="h-4 w-4" />
-                        </IconButton>
-                      </Tooltip>
-                    </td>
-                  </tr>
-                );
-              }
-            )}
+                    </div>
+                  </td>
+                  <td className={classes}>
+                    <div className="w-max">{category.name}</div>
+                  </td>
+                  <td className={classes}>
+                    <div className="w-max">
+                      {status === "AVAILABLE" && (
+                        <Chip
+                          variant="ghost"
+                          size="sm"
+                          value={status}
+                          color="green"
+                        />
+                      )}
+                      {status === "NOT AVAILABLE" && (
+                        <Chip
+                          variant="ghost"
+                          size="sm"
+                          value={status}
+                          color="gray"
+                        />
+                      )}
+                      {status === "MISSING" && (
+                        <Chip
+                          variant="ghost"
+                          size="sm"
+                          value={status}
+                          color="red"
+                        />
+                      )}
+                      {status === "DEFECTIVE" && (
+                        <Chip
+                          variant="ghost"
+                          size="sm"
+                          value={status}
+                          color="yellow"
+                        />
+                      )}
+                    </div>
+                  </td>
+                  <td className={classes}>
+                    <Tooltip content="View">
+                      <IconButton
+                        variant="text"
+                        onClick={() => onNavigate(`/inventory/${id}`)}
+                      >
+                        <MdOutlineRemoveRedEye className="h-4 w-4" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip content="Edit">
+                      <IconButton
+                        variant="text"
+                        onClick={() => onNavigate(`/inventory/${id}/update`)}
+                      >
+                        <MdOutlineEdit className="h-4 w-4" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip content="Delete">
+                      <IconButton variant="text" onClick={() => onDelete(id)}>
+                        <MdDeleteOutline className="h-4 w-4" />
+                      </IconButton>
+                    </Tooltip>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </CardBody>

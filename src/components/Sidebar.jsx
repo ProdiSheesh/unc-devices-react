@@ -12,8 +12,11 @@ import {
   MdOutlineInventory2,
   MdOutlineLogout,
 } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
+  const navigate = useNavigate();
+
   return (
     <Card className="h-screen fixed left-0 w-full max-w-[17rem] p-4 shadow-xl shadow-blue-gray-900/5">
       <div className="mb-16 p-4">
@@ -30,7 +33,7 @@ export default function Sidebar() {
             </ListItemPrefix>
             Dashboard
           </ListItem>
-          <ListItem>
+          <ListItem onClick={() => navigate("/inventory")}>
             <ListItemPrefix>
               <MdOutlineInventory2 className="h-5 w-5" />
             </ListItemPrefix>
