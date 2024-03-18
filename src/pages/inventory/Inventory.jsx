@@ -5,10 +5,12 @@ import axios from "axios";
 import { URL } from "../../config/global";
 import { Spinner } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 export default function Inventory() {
   const [devices, setDevices] = useState([]); // put fetch data here
   const [isLoading, setIsLoading] = useState(true);
+  const [cookies] = useCookies(["token"]);
 
   const navigate = useNavigate();
 
@@ -16,7 +18,13 @@ export default function Inventory() {
     async function fetchData() {
       setIsLoading(true);
 
-      const response = await axios.get(`${URL}/devices`);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      };
+
+      const response = await axios.get(`${URL}/devices`, config);
 
       setDevices(response.data);
 
@@ -24,12 +32,19 @@ export default function Inventory() {
     }
 
     fetchData();
-  }, []);
+  }, [cookies.token]);
 
   async function handleDelete(id) {
     try {
       setIsLoading(true);
-      const response = await axios.delete(`${URL}/devices/${id}`);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      };
+
+      const response = await axios.delete(`${URL}/devices/${id}`, config);
       console.log(response);
       setIsLoading(false);
       navigate(0);
@@ -42,7 +57,16 @@ export default function Inventory() {
     try {
       setIsLoading(true);
 
-      const response = await axios.get(`${URL}/devices?q=${data.query}`);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      };
+
+      const response = await axios.get(
+        `${URL}/devices?q=${data.query}`,
+        config
+      );
 
       setDevices(response.data);
 

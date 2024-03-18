@@ -15,6 +15,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/global";
+import { useCookies } from "react-cookie";
 
 export default function UpdateDevice() {
   const {
@@ -27,14 +28,21 @@ export default function UpdateDevice() {
   const [categories, setCategories] = useState([]);
   const [device, setDevice] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [cookies] = useCookies(["token"]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
 
-        const categoriesRes = await axios.get(`${URL}/categories`);
-        const deviceRes = await axios.get(`${URL}/devices/${id}`);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${cookies.token}`,
+          },
+        };
+
+        const categoriesRes = await axios.get(`${URL}/categories`, config);
+        const deviceRes = await axios.get(`${URL}/devices/${id}`, config);
 
         setCategories(categoriesRes.data);
         setDevice(deviceRes.data);
@@ -46,18 +54,21 @@ export default function UpdateDevice() {
     }
 
     fetchData();
-  }, [id]);
+  }, [cookies.token, id]);
 
   async function onSubmit(data) {
     try {
       setIsLoading(true);
 
       data.categoryId = parseInt(data.categoryId);
-      console.log(data);
 
-      const response = await axios.patch(`${URL}/devices/${id}`, data);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      };
 
-      console.log(response);
+      const response = await axios.patch(`${URL}/devices/${id}`, data, config);
 
       setIsLoading(false);
       navigate("/inventory");
