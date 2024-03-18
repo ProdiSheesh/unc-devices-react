@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/global";
+import { useCookies } from "react-cookie";
 
 export default function AddDevice() {
   const {
@@ -25,13 +26,20 @@ export default function AddDevice() {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [cookies] = useCookies(["token"]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
 
-        const response = await axios.get(`${URL}/categories`);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${cookies.token}`,
+          },
+        };
+
+        const response = await axios.get(`${URL}/categories`, config);
 
         console.log(response.data);
         setCategories(response.data);
@@ -43,7 +51,7 @@ export default function AddDevice() {
     }
 
     fetchData();
-  }, []);
+  }, [cookies.token]);
 
   async function onSubmit(data) {
     try {
@@ -51,7 +59,13 @@ export default function AddDevice() {
 
       data.categoryId = parseInt(data.categoryId);
 
-      const response = await axios.post(`${URL}/devices`, data);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      };
+
+      const response = await axios.post(`${URL}/devices`, data, config);
 
       console.log(response);
 

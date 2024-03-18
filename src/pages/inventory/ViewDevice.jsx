@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { URL } from "../../config/global";
 import { MdArrowBack, MdDeleteOutline, MdEdit } from "react-icons/md";
+import { useCookies } from "react-cookie";
 
 export default function ViewDevice() {
   const { id } = useParams();
@@ -20,12 +21,20 @@ export default function ViewDevice() {
 
   const [device, setDevice] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [cookies] = useCookies(["token"]);
 
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
-        const response = await axios.get(`${URL}/devices/${id}`);
+
+        const config = {
+          headers: {
+            Authorization: `Bearer ${cookies.token}`,
+          },
+        };
+
+        const response = await axios.get(`${URL}/devices/${id}`, config);
         console.log(response.data);
         setDevice(response.data);
 
@@ -36,12 +45,19 @@ export default function ViewDevice() {
     }
 
     fetchData();
-  }, [id]);
+  }, [cookies.token, id]);
 
   async function handleDelete(id) {
     try {
       setIsLoading(true);
-      const response = await axios.delete(`${URL}/devices/${id}`);
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${cookies.token}`,
+        },
+      };
+
+      const response = await axios.delete(`${URL}/devices/${id}`, config);
       console.log(response);
       setIsLoading(false);
       navigate("/inventory");
